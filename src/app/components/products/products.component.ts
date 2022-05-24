@@ -10,8 +10,12 @@ import {FormBuilder, FormGroup} from "@angular/forms";
 })
 export class ProductsComponent implements OnInit {
   products!: Array<Product>
+  currentPage: number = 0;
+  pageSize: number = 5;
+  totalPages: number = 0;
   errorMessage!: string;
-  searchFormGroup!: FormGroup
+  searchFormGroup!: FormGroup;
+  currentAction: string = "all";
 
   constructor(private productService: ProductService, private fb: FormBuilder) {
   }
@@ -34,10 +38,15 @@ export class ProductsComponent implements OnInit {
     this.searchFormGroup = this.fb.group({
       keyword: this.fb.control(null)
     })
-    this.productService.getAllProducts().subscribe(
+    this.getPageProduct();
+  }
+
+  getPageProduct() {
+    this.productService.getPageProduct(this.currentPage, this.pageSize).subscribe(
       {
         next: (data) => {
-          this.products = data;
+          this.products = data.products;
+          this.totalPages = data.totalPages;
         }, error: (err) => {
           this.errorMessage = err;
         }
@@ -57,13 +66,22 @@ export class ProductsComponent implements OnInit {
   }
 
   searchProduct() {
+    this.currentAction = "search";
+    this.currentPage=0;
     let keyword = this.searchFormGroup.value.keyword;
-    this.productService.searchProduct(keyword).subscribe({
+    this.productService.searchProduct(keyword, this.currentPage, this.pageSize).subscribe({
       next: (data) => {
-        this.products = data
+        this.products = data.products;
+        this.totalPages = data.totalPages;
       }, error: err => {
         this.errorMessage = err
       }
     })
+  }
+
+  gotoPage(i: number) {
+    this.currentPage = i;
+    this.currentAction === "all" ?
+      this.getPageProduct() : this.searchProduct();
   }
 }
