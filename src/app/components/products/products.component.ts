@@ -20,7 +20,7 @@ export class ProductsComponent implements OnInit {
   constructor(private productService: ProductService, private fb: FormBuilder) {
   }
 
-
+/*delete*/
   deleteDeleteProduct(product: Product) {
     let cnf = confirm("Are you sure ?")
     if (!cnf) return
